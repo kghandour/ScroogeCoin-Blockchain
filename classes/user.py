@@ -22,7 +22,7 @@ class User:
     
     def sign_message(self, message):
         signature = self.private_key.sign(
-            message.encode(),
+            message.encode("utf-8"),
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
                 salt_length=padding.PSS.MAX_LENGTH
@@ -30,5 +30,4 @@ class User:
             hashes.SHA256()
         )
         return signature
-    
 
