@@ -6,11 +6,12 @@ from cryptography.hazmat.primitives.asymmetric import padding
 class User:
     user_id = None
     private_key = None
-    coins = 10
+    coins = []
     
-    def __init__(self, userid):
+    def __init__(self, userid, coinsList):
         self.private_key = self.generate_private_key()
         self.user_id = userid
+        self.coins = coinsList
 
     def generate_private_key(self):
         private_key = rsa.generate_private_key(
