@@ -25,14 +25,15 @@ def create_transaction(lastTransaction):
     a = a_b[0]
     b = a_b[1]
     amount = random.randint(1,len(a.coins))
-    coins = [a.coins[:amount]] 
+    coins = a.coins[:amount]
     transaction = {}
     transaction['previous_transaction'] = lastTransaction
     transaction['sender'] = a.user_id
     transaction['receiver'] = b.user_id
     transaction['coins'] = coins
     signature = a.sign_message(transaction.__str__())
-    return transaction, signature
+    transaction_hash = hash(str(transaction))
+    return transaction, signature, transaction_hash
     
 def find_user(id):
     for user in users:
@@ -59,10 +60,39 @@ def verify_signature(transaction, signature):
         return False
 
 
+def complete_transaction(transaction):
+    sender_id = transaction['sender']
+    sender = find_user(sender_id)
+    receiver_id = transaction['receiver']
+    receiver = find_user(receiver_id)
+    coins = transaction['coins']
+    owns_it = True
+    for coin in coins:
+        if(not sender.has_coin(coin)):
+            return False
+
+    for coin in coins:
+        sender.remove_coin(coin)
+        receiver.add_coin(coin)
+    
+    return True
+
 if __name__ == "__main__":
     users = initialize_users()
-    t, s = create_transaction(lastTransaction)
+    completed = False
+    t, s, h = create_transaction(lastTransaction)
     print(t, base64.b64encode(s))
     b = verify_signature(t,s)
-    print(b)
+    if (b is None):
+        completed = complete_transaction(t)
+    print(completed)
+
+    sender_id = t['sender']
+    sender = find_user(sender_id)
+    receiver_id = t['receiver']
+    receiver = find_user(receiver_id)
+
+    print(sender.coins)
+    print(receiver.coins)
+
 

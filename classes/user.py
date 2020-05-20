@@ -32,3 +32,14 @@ class User:
         )
         return signature
 
+    def has_coin(self, cid):
+        if(self.coins.__contains__(cid)):
+            return True
+        return False
+
+    def remove_coin(self,cid):
+        self.coins.remove(cid)
+    
+    def add_coin(self, cid):
+        self.coins.append(cid)
+
