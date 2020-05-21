@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 import base64
 from classes.utils import generate_private_key, sign_message
+import keyboard
 
 
 users =[] 
@@ -32,6 +33,10 @@ def create_transaction(lastTransaction):
     a_b = random.sample(users, 2)
     a = a_b[0]
     b = a_b[1]
+    while(len(a.coins)<1):
+        a_b = random.sample(users, 2)
+        a = a_b[0]
+        b = a_b[1]
     amount = random.randint(1,len(a.coins))
     coins = a.coins[:amount]
     transaction = {}
@@ -88,20 +93,37 @@ def complete_transaction(transaction):
 if __name__ == "__main__":
     scrooge_private = generate_private_key()
     users = initialize_users()
-    completed = False
-    t, s, h = create_transaction(lastTransaction)
-    print(t, base64.b64encode(s))
-    b = verify_signature(t,s)
-    if (b is None):
-        completed = complete_transaction(t)
-    print(completed)
+    blocks = []
+    j = 0
+    last_block = -1
+    while True:
+        if keyboard.press_and_release('space'):
+            break
+        print("Initializing block number ",j)
+        block = []
+        for i in range(10):
+            completed = False
+            t, s, h = create_transaction(lastTransaction)
+            # print(t, base64.b64encode(s))
+            b = verify_signature(t,s)
+            if (b is None):
+                completed = complete_transaction(t)
+            if(completed):
+                lastTransaction = h
+                block.append([t, s ,h])
+                print("Transaction number ", j*10+i , " are completed")
+            else:
+                i-=1
+        block_details = {'block':block, 'hash':hash(str(block)), 'id':j, 'previous_block':last_block}
+        blocks.append(block_details)
+        last_block = hash(str(block_details))
+        sign_message(scrooge_private, last_block)
+        j+=1
+        print("Block appended ",j)   
 
-    sender_id = t['sender']
-    sender = find_user(sender_id)
-    receiver_id = t['receiver']
-    receiver = find_user(receiver_id)
 
-    print(sender.coins)
-    print(receiver.coins)
+    
+
+
 
 
