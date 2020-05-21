@@ -1,12 +1,19 @@
 from classes.user import User
 import random
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 import base64
+from classes.utils import generate_private_key, sign_message
+
 
 users =[] 
 lastTransaction = -1
+scrooge_private = None
+
+
 
 def initialize_users():
     # Need to create a datastructure that stores the user
@@ -14,8 +21,9 @@ def initialize_users():
     for i in range(10):
         coinsList= []
         for j in range(10):
-            cID = i*10+j
-            coinsList.append(cID)
+            cID = str(i*10+j)
+            signature = sign_message(scrooge_private, cID)
+            coinsList.append([cID, signature])
         newUser = User(i, coinsList)
         users.append(newUser)
     return users
@@ -78,6 +86,7 @@ def complete_transaction(transaction):
     return True
 
 if __name__ == "__main__":
+    scrooge_private = generate_private_key()
     users = initialize_users()
     completed = False
     t, s, h = create_transaction(lastTransaction)
