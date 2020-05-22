@@ -1,6 +1,6 @@
 from classes.user import User
 import random
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -8,6 +8,7 @@ from cryptography.exceptions import InvalidSignature
 import base64
 from classes.utils import generate_private_key, sign_message
 import keyboard
+import sys
 
 
 users =[] 
@@ -23,9 +24,14 @@ def initialize_users():
         coinsList= []
         for j in range(10):
             cID = str(i*10+j)
-            signature = sign_message(scrooge_private, cID)
+            signature = sign_message(scrooge_private, str(cID))
             coinsList.append([cID, signature])
         newUser = User(i, coinsList)
+        print("User "+str(i)+"\n"+str(newUser.private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ))) 
+        print("10 coins")
         users.append(newUser)
     return users
 
@@ -79,7 +85,6 @@ def complete_transaction(transaction):
     receiver_id = transaction['receiver']
     receiver = find_user(receiver_id)
     coins = transaction['coins']
-    owns_it = True
     for coin in coins:
         if(not sender.has_coin(coin)):
             return False
@@ -91,36 +96,47 @@ def complete_transaction(transaction):
     return True
 
 if __name__ == "__main__":
+    orig_stdout = sys.stdout
+    f = open('out.txt', 'w')
+    sys.stdout = f
     scrooge_private = generate_private_key()
     users = initialize_users()
     blocks = []
     j = 0
     last_block = -1
-    while True:
-        if keyboard.press_and_release('space'):
-            break
-        print("Initializing block number ",j)
-        block = []
-        for i in range(10):
-            completed = False
-            t, s, h = create_transaction(lastTransaction)
-            # print(t, base64.b64encode(s))
-            b = verify_signature(t,s)
-            if (b is None):
-                completed = complete_transaction(t)
-            if(completed):
-                lastTransaction = h
-                block.append([t, s ,h])
-                print("Transaction number ", j*10+i , " are completed")
-            else:
-                i-=1
-        block_details = {'block':block, 'hash':hash(str(block)), 'id':j, 'previous_block':last_block}
-        blocks.append(block_details)
-        last_block = hash(str(block_details))
-        sign_message(scrooge_private, last_block)
-        j+=1
-        print("Block appended ",j)   
-
+    try: 
+        while True:
+            if keyboard.press_and_release('space'):
+                break
+            print("============================")
+            print("Initializing block number ",j)
+            block = []
+            for i in range(10):
+                completed = False
+                t, s, h = create_transaction(lastTransaction)
+                # print(t, base64.b64encode(s))
+                b = verify_signature(t,s)
+                if (b is None):
+                    completed = complete_transaction(t)
+                if(completed):
+                    lastTransaction = h
+                    block.append([t, s ,h])
+                    print("Transaction number ", j*10+i , " are completed")
+                    print("Sender is "+str(t['sender']))
+                    print("Receiver is "+str(t['receiver']))
+                    print("Amount is "+str(len(t['coins']))) 
+                else:
+                    i-=1
+            block_details = {'block':block, 'hash':hash(str(block)), 'id':j, 'previous_block':last_block}
+            blocks.append(block_details)
+            last_block = hash(str(block_details))
+            sign_message(scrooge_private, str(last_block))
+            j+=1
+            print(block_details['hash'])
+            print("Block appended ",j) 
+    except KeyboardInterrupt:
+        sys.stdout = orig_stdout
+        f.close()
 
     
 
