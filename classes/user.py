@@ -5,10 +5,9 @@ class User:
     private_key = None
     coins = []
     
-    def __init__(self, userid, coinsList):
+    def __init__(self, userid):
         self.private_key = utils.generate_private_key()
         self.user_id = userid
-        self.coins = coinsList
 
     def sign_message(self, message):
         return utils.sign_message(self.private_key, message)
