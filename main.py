@@ -161,6 +161,7 @@ if __name__ == "__main__":
     scrooge_private = generate_private_key()
     users, init_transactions = initialize_users()
     queue = []
+    blockchain = {}
     # for transaction in init_transactions:
     for transaction in init_transactions:
         dictionary = sign_and_hash("transaction", transaction)
@@ -169,7 +170,9 @@ if __name__ == "__main__":
             block = create_block(queue)
             queue = []
             signed_block = sign_and_hash("block", block)
-            print(signed_block)
+            for key in signed_block:
+                blockchain[key] = signed_block[key]
+    print(blockchain)
 
     
     # l = {}
