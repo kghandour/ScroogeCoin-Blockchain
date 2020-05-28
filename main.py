@@ -7,14 +7,14 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 import base64
 from classes.utils import generate_private_key, sign_message
-import keyboard
+from keyboard import is_pressed
 import sys
 import json
 
 
 
 users =[] 
-lastTransaction = -1
+lastTransaction = None
 scrooge_private = None
 
 
@@ -73,6 +73,8 @@ def find_user(id):
 
 def verify_signature(j, signature):
     t = json.loads(j)
+    with_bytes= signature.encode('utf-8')    
+    b = base64.b64decode(with_bytes)
     sender_id = t['sender']
     public_key = scrooge_private.public_key()
     if(sender_id != 'scrooge'):
@@ -80,7 +82,7 @@ def verify_signature(j, signature):
         public_key = sender.private_key.public_key() # TODO: Getter method for public key
     try:
         verify =  public_key.verify(
-            signature = signature,
+            signature = b,
             data= j.encode('utf-8'),
             padding = padding.PSS(
                 mgf = padding.MGF1(hashes.SHA256()),
@@ -109,26 +111,81 @@ def verify_signature(j, signature):
     
 #     return True
 
+
+def sign_and_hash(message_type, message):
+    dict_with_sig = {}
+    if(message_type == "transaction"):
+        dict_with_sig['transaction'] = message
+    elif(message_type == "block"):
+        dict_with_sig['block'] = message
+    message_json = json.dumps(message)
+    signature = sign_message(scrooge_private, message_json)
+    encoded = base64.b64encode(signature)
+    no_bytes = encoded.decode('utf-8')
+    dict_with_sig['signature'] = no_bytes
+    dict_json = json.dumps(dict_with_sig)
+    dict_json_bytes = dict_json.encode('utf-8')
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+    digest.update(dict_json_bytes)
+    hashed = digest.finalize()
+    b64_hash = base64.b64encode(hashed).decode('utf-8')
+    dictionary = {b64_hash : dict_with_sig}
+    return dictionary
+
+def verify_transaction(transaction, public_key):
+    signature = transaction['signature']
+    message = transaction['transaction']
+    message_json = json.dumps(message)
+    verification = verify_signature(message_json, signature)
+    return verification
+
+def create_block(queue):
+    block = {}
+    for item in queue:
+        for key in item:
+            verification = verify_transaction(item[key], scrooge_private.public_key())
+            if(verification is None):
+                block[key] = item[key]
+    return block
+
+
+
 if __name__ == "__main__":
     # orig_stdout = sys.stdout
     # f = open('out.txt', 'w')
     # sys.stdout = f
     scrooge_private = generate_private_key()
     users, init_transactions = initialize_users()
+    queue = []
     # for transaction in init_transactions:
-    transaction = init_transactions[0]
-    l = {}
-    j = json.dumps(transaction)
-    l['transaction'] = transaction
-    s = sign_message(scrooge_private, j)
-    encoded = base64.b64encode(s)
-    b = base64.b64decode(encoded)
-    print("=====")
-    print(s)
-    print("-----")
-    print(b)
+    for transaction in init_transactions:
+        dictionary = sign_and_hash("transaction", transaction)
+        queue.append(dictionary)
+        if(len(queue)==10):
+            block = create_block(queue)
+            queue = []
+            signed_block = sign_and_hash("block", block)
+            print(signed_block)
+
+    
+    # l = {}
+    # j = json.dumps(transaction)
+    # l['transaction'] = transaction
+    # s = sign_message(scrooge_private, j)
+    # encoded = base64.b64encode(s)
+    # print(encoded)
+    # no_bytes = encoded.decode('utf-8')
+    # l['signature'] = no_bytes
+    # with_bytes= no_bytes.encode('utf-8')
+    
+    # print(hash(json.dumps(l)))
+    # b = base64.b64decode(encoded)
+    # print("=====")
+    # print(s)
+    # print("-----")
     # print(b)
-    print(verify_signature(j,b))
+    # # print(b)
+    # print(verify_signature(j,b))
     # j2 = json.dumps(l)
     # print(j2)
 
