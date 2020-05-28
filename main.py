@@ -14,7 +14,7 @@ import json
 
 
 users =[] 
-lastTransaction = None
+previous_block = None
 scrooge_private = None
 
 
@@ -129,6 +129,9 @@ def sign_and_hash(message_type, message):
     digest.update(dict_json_bytes)
     hashed = digest.finalize()
     b64_hash = base64.b64encode(hashed).decode('utf-8')
+    if(message_type == "block"):
+        global previous_block
+        previous_block = b64_hash
     dictionary = {b64_hash : dict_with_sig}
     return dictionary
 
@@ -146,6 +149,7 @@ def create_block(queue):
             verification = verify_transaction(item[key], scrooge_private.public_key())
             if(verification is None):
                 block[key] = item[key]
+    block['previous_block'] = previous_block
     return block
 
 
