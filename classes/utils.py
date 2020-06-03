@@ -59,6 +59,5 @@ def find_previous_transaction(cID):
             if(transaction_key!='previous_block'):
                 transaction = block[transaction_key]['transaction']
                 if(cID==transaction['coin_id']):
-                    print(transaction_key)
                     prev_transaction = transaction_key
     return prev_transaction

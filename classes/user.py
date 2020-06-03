@@ -24,7 +24,13 @@ class User:
         return self.private_key.public_key()
 
     def remove_coin(self,cid):
-        self.coins.remove(cid)
+        coin_with_sig = []
+        for coin in self.coins:
+            if(coin[0]==cid):
+                self.coins.remove(coin)
+                coin_with_sig = coin
+                break
+        return coin_with_sig
     
     def add_coin(self, cid):
         self.coins.append(cid)
@@ -37,7 +43,6 @@ class User:
                 number = random.randint(0, 9)
             transaction = {}
             cID = self.coins[0][0]
-            print(cID)
             transaction['previous_transaction'] = utils.find_previous_transaction(cID)
             transaction['sender'] = self.user_id
             transaction['receiver'] = number

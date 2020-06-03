@@ -16,7 +16,7 @@ import json
 
 users =[] 
 scrooge_private = None
-
+queue = []
 
 
 def initialize_users():
@@ -69,20 +69,44 @@ def verify_signature(j, signature):
     except InvalidSignature:
         return False
 
-def verify_transaction(transaction, public_key):
+def verify_transaction(transaction):
     signature = transaction['signature']
     message = transaction['transaction']
     message_json = json.dumps(message)
     verification = verify_signature(message_json, signature)
     return verification
 
-def create_block(queue):
-    block = {}
-    for item in queue:
+def check_double(transaction, index):
+    get_cID = transaction['coin_id']
+    get_sender = transaction['sender']
+    for index2, signed_transaction in enumerate(queue):
+        for key in signed_transaction:
+            q_transaction = signed_transaction[key]['transaction']
+            if(get_cID==q_transaction['coin_id'] and get_sender==q_transaction['sender'] and index > index2):
+                print("Double Spending, User ",get_sender," Tried to pay coin ID",get_cID, "to Users ", transaction['receiver'], " and ", q_transaction['receiver'])
+                queue.remove(queue[index])
+                index-=1
+                return True    
+    return False
+
+def doChecks(check_double_spending=False):
+    for index, item in enumerate(queue):
         for key in item:
-            verification = verify_transaction(item[key], scrooge_private.public_key())
+            verification = verify_transaction(item[key])
             if(verification is None):
-                block[key] = item[key]
+                if(check_double_spending):
+                    ds = check_double(item[key]['transaction'], index)
+            else:
+                queue.remove(queue[index])
+                index-=1
+
+def create_block(check_double_spending=False):
+    block = {}
+    for index in range(10):
+        item = queue[index]
+        for key in item:
+            block[key] = item[key]
+
     block['previous_block'] = utils.previous_block
     return block
 
@@ -131,6 +155,18 @@ def find_user(id):
 #         receiver.add_coin(coin)
     
 #     return True
+def complete_transaction(block):
+    for key in block:
+        if(key!="previous_block"):
+            signed_t = block[key]
+            transaction = signed_t['transaction']
+            sender = find_user(transaction['sender'])
+            cID = transaction['coin_id']
+            receiver = find_user(transaction['receiver'])
+            coin = sender.remove_coin(cID)
+            receiver.add_coin(coin)
+
+
 
 if __name__ == "__main__":
     # orig_stdout = sys.stdout
@@ -138,22 +174,35 @@ if __name__ == "__main__":
     # sys.stdout = f
     scrooge_private = generate_private_key()
     users, init_transactions = initialize_users()
-    queue = []
+
     
     # for transaction in init_transactions:
     for transaction in init_transactions:
         dictionary = sign_and_hash("transaction", transaction, scrooge_private)
         queue.append(dictionary)
         if(len(queue)==10):
-            block = create_block(queue)
+            doChecks(check_double_spending=False)
+            block = create_block()
             queue = []
             signed_block = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
-    for i in range(10):
+    for i in range(100):
         random_user_id = random.randint(0,9)
         transaction = users[random_user_id].create_transaction()
         queue.append(transaction)
+        if(len(queue)>=10):
+            doChecks(check_double_spending=True)
+        if(len(queue)>=10):
+            block = create_block()
+            queue = queue[10:]
+            signed_block = sign_and_hash("block", block, scrooge_private)
+            for key in signed_block:
+                utils.blockchain[key] = signed_block[key]
+            print("Block added to blockchain. Now completing transactions")
+            complete_transaction(block)
+
+    print(len(utils.blockchain))
     
     
     # l = {}
