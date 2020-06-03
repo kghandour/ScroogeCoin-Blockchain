@@ -7,6 +7,7 @@ import base64
 
 blockchain = {}
 previous_block = None
+number_of_users=100
 
 def generate_private_key():
     private_key = rsa.generate_private_key(
@@ -49,7 +50,7 @@ def sign_and_hash(message_type, message, private_key):
         global previous_block
         previous_block = b64_hash
     dictionary = {b64_hash : dict_with_sig}
-    return dictionary
+    return dictionary, b64_hash
 
 def find_previous_transaction(cID):
     prev_transaction = None

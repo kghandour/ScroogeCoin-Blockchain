@@ -40,15 +40,17 @@ class User:
         number = self.user_id
         if(len(self.coins)>0):
             while(number==self.user_id):
-                number = random.randint(0, 9)
+                number = random.randint(0, utils.number_of_users-1)
             transaction = {}
             cID = self.coins[0][0]
             transaction['previous_transaction'] = utils.find_previous_transaction(cID)
             transaction['sender'] = self.user_id
             transaction['receiver'] = number
             transaction['coin_id'] = cID
-            dictionary = utils.sign_and_hash('transaction', transaction, self.private_key)
+            dictionary, t_hash = utils.sign_and_hash('transaction', transaction, self.private_key)
+            print("Creating Transaction ID: ",t_hash, " User ",transaction['sender'], " Sending CoinID ",transaction['coin_id']," to User ",transaction['receiver'], " Previous transaction ID ",transaction['previous_transaction'])
             return dictionary
+        return None
 
 
 

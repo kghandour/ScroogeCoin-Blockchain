@@ -19,12 +19,13 @@ scrooge_private = None
 queue = []
 
 
+
 def initialize_users():
     # Need to create a datastructure that stores the user
     users = []
     transactions = []
 
-    for i in range(10):
+    for i in range(utils.number_of_users):
         coinsList= []
         newUser = User(i)
         for j in range(10):
@@ -100,11 +101,13 @@ def doChecks(check_double_spending=False):
                 queue.remove(queue[index])
                 index-=1
 
-def create_block(check_double_spending=False):
+def create_block(print_transactions=False):
     block = {}
     for index in range(10):
         item = queue[index]
         for key in item:
+            if(print_transactions):
+                print("Adding to block Transaction ID: ",key)
             block[key] = item[key]
 
     block['previous_block'] = utils.previous_block
@@ -178,13 +181,13 @@ if __name__ == "__main__":
     
     # for transaction in init_transactions:
     for transaction in init_transactions:
-        dictionary = sign_and_hash("transaction", transaction, scrooge_private)
+        dictionary, _ = sign_and_hash("transaction", transaction, scrooge_private)
         queue.append(dictionary)
         if(len(queue)==10):
             doChecks(check_double_spending=False)
             block = create_block()
             queue = []
-            signed_block = sign_and_hash("block", block, scrooge_private)
+            signed_block, _  = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
     while True:
@@ -192,18 +195,20 @@ if __name__ == "__main__":
             print("Created ", len(utils.blockchain), " blocks")
             SystemExit(0)
             break
-        random_user_id = random.randint(0,9)
+        random_user_id = random.randint(0,utils.number_of_users-1)
         transaction = users[random_user_id].create_transaction()
-        queue.append(transaction)
+        if(transaction is not None):
+            queue.append(transaction)
         if(len(queue)>=10):
             doChecks(check_double_spending=True)
         if(len(queue)>=10):
-            block = create_block()
+            print("Creating a block")
+            block = create_block(print_transactions=True)
             queue = queue[10:]
-            signed_block = sign_and_hash("block", block, scrooge_private)
+            signed_block, _ = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
-            print("Block added to blockchain. Now completing transactions")
+                print("Block ID: ",key," Previous block ID ", block['previous_block'])
             complete_transaction(block)
         # sys.stdout = orig_stdout
         # f.close()
