@@ -187,7 +187,11 @@ if __name__ == "__main__":
             signed_block = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
-    for i in range(100):
+    while True:
+        if is_pressed(' '):
+            print("Created ", len(utils.blockchain), " blocks")
+            SystemExit(0)
+            break
         random_user_id = random.randint(0,9)
         transaction = users[random_user_id].create_transaction()
         queue.append(transaction)
@@ -201,8 +205,10 @@ if __name__ == "__main__":
                 utils.blockchain[key] = signed_block[key]
             print("Block added to blockchain. Now completing transactions")
             complete_transaction(block)
-
-    print(len(utils.blockchain))
+        # sys.stdout = orig_stdout
+        # f.close()
+    
+    
     
     
     # l = {}
@@ -259,10 +265,8 @@ if __name__ == "__main__":
     #         j+=1
     #         print(block_details['hash'])
     #         print("Block appended ",j) 
-    # except KeyboardInterrupt:
-    #     SystemExit(0)
-    #     # sys.stdout = orig_stdout
-    #     # f.close()
+        # sys.stdout = orig_stdout
+        # f.close()
 
     
 
