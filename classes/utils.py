@@ -9,6 +9,11 @@ blockchain = {}
 previous_block = None
 number_of_users=100
 
+def printLog(*args, **kwargs): # Stackoverflow: https://stackoverflow.com/questions/11325019/how-to-output-to-the-console-and-file
+    print(*args, **kwargs)
+    with open('output.txt','a') as file:
+        print(*args, **kwargs, file=file)
+
 def generate_private_key():
     private_key = rsa.generate_private_key(
         public_exponent=65537,

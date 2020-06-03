@@ -39,11 +39,11 @@ def initialize_users():
             transaction['coin_id'] = cID
             transactions.append(transaction)
 
-        print("User "+str(i)+"\n"+str(newUser.private_key.public_key().public_bytes(
+        utils.printLog("User "+str(i)+"\n"+str(newUser.private_key.public_key().public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ))) 
-        print("10 coins")
+        utils.printLog("10 coins")
         users.append(newUser)
     return users, transactions
 
@@ -84,7 +84,7 @@ def check_double(transaction, index):
         for key in signed_transaction:
             q_transaction = signed_transaction[key]['transaction']
             if(get_cID==q_transaction['coin_id'] and get_sender==q_transaction['sender'] and index > index2):
-                print("Double Spending, User ",get_sender," Tried to pay coin ID",get_cID, "to Users ", transaction['receiver'], " and ", q_transaction['receiver'])
+                utils.printLog("Double Spending, User ",get_sender," Tried to pay coin ID",get_cID, "to Users ", transaction['receiver'], " and ", q_transaction['receiver'])
                 queue.remove(queue[index])
                 index-=1
                 return True    
@@ -107,7 +107,7 @@ def create_block(print_transactions=False):
         item = queue[index]
         for key in item:
             if(print_transactions):
-                print("Adding to block Transaction ID: ",key)
+                utils.printLog("Adding to block Transaction ID: ",key)
             block[key] = item[key]
 
     block['previous_block'] = utils.previous_block
@@ -192,7 +192,7 @@ if __name__ == "__main__":
                 utils.blockchain[key] = signed_block[key]
     while True:
         if is_pressed(' '):
-            print("Created ", len(utils.blockchain), " blocks")
+            utils.printLog("Created ", len(utils.blockchain), " blocks")
             SystemExit(0)
             break
         random_user_id = random.randint(0,utils.number_of_users-1)
@@ -202,13 +202,13 @@ if __name__ == "__main__":
         if(len(queue)>=10):
             doChecks(check_double_spending=True)
         if(len(queue)>=10):
-            print("Creating a block")
+            utils.printLog("Creating a block")
             block = create_block(print_transactions=True)
             queue = queue[10:]
             signed_block, _ = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
-                print("Block ID: ",key," Previous block ID ", block['previous_block'])
+                utils.printLog("Block ID: ",key," Previous block ID ", block['previous_block'])
             complete_transaction(block)
         # sys.stdout = orig_stdout
         # f.close()
@@ -221,21 +221,21 @@ if __name__ == "__main__":
     # l['transaction'] = transaction
     # s = sign_message(scrooge_private, j)
     # encoded = base64.b64encode(s)
-    # print(encoded)
+    # utils.printLog(encoded)
     # no_bytes = encoded.decode('utf-8')
     # l['signature'] = no_bytes
     # with_bytes= no_bytes.encode('utf-8')
     
-    # print(hash(json.dumps(l)))
+    # utils.printLog(hash(json.dumps(l)))
     # b = base64.b64decode(encoded)
-    # print("=====")
-    # print(s)
-    # print("-----")
-    # print(b)
-    # # print(b)
-    # print(verify_signature(j,b))
+    # utils.printLog("=====")
+    # utils.printLog(s)
+    # utils.printLog("-----")
+    # utils.printLog(b)
+    # # utils.printLog(b)
+    # utils.printLog(verify_signature(j,b))
     # j2 = json.dumps(l)
-    # print(j2)
+    # utils.printLog(j2)
 
     # blocks = []
     # j = 0
@@ -244,23 +244,23 @@ if __name__ == "__main__":
     #     while True:
     #         if keyboard.press_and_release('space'):
     #             break
-    #         print("============================")
-    #         print("Initializing block number ",j)
+    #         utils.printLog("============================")
+    #         utils.printLog("Initializing block number ",j)
     #         block = []
     #         for i in range(10):
     #             completed = False
     #             t, s, h = create_transaction(lastTransaction)
-    #             # print(t, base64.b64encode(s))
+    #             # utils.printLog(t, base64.b64encode(s))
     #             b = verify_signature(t,s)
     #             if (b is None):
     #                 completed = complete_transaction(t)
     #             if(completed):
     #                 lastTransaction = h
     #                 block.append([t, s ,h])
-    #                 print("Transaction number ", j*10+i , " are completed")
-    #                 print("Sender is "+str(t['sender']))
-    #                 print("Receiver is "+str(t['receiver']))
-    #                 print("Amount is "+str(len(t['coins']))) 
+    #                 utils.printLog("Transaction number ", j*10+i , " are completed")
+    #                 utils.printLog("Sender is "+str(t['sender']))
+    #                 utils.printLog("Receiver is "+str(t['receiver']))
+    #                 utils.printLog("Amount is "+str(len(t['coins']))) 
     #             else:
     #                 i-=1
     #         block_details = {'block':block, 'hash':hash(str(block)), 'id':j, 'previous_block':last_block}
@@ -268,8 +268,8 @@ if __name__ == "__main__":
     #         last_block = hash(str(block_details))
     #         sign_message(scrooge_private, str(last_block))
     #         j+=1
-    #         print(block_details['hash'])
-    #         print("Block appended ",j) 
+    #         utils.printLog(block_details['hash'])
+    #         utils.printLog("Block appended ",j) 
         # sys.stdout = orig_stdout
         # f.close()
 
