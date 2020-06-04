@@ -34,7 +34,8 @@ def initialize_users():
             signature = sign_message(scrooge_private, str(cID))
             encoded = base64.b64encode(signature)
             no_bytes = encoded.decode('utf-8')
-            coin_dict = {cID: no_bytes}
+            coin_dict = {}
+            coin_dict[cID] = no_bytes
             newUser.add_coin(coin_dict)
             transaction = {}
             transaction['previous_transaction'] = None

@@ -44,7 +44,7 @@ class User:
             transaction['receiver'] = number
             transaction['coin_id'] = cID
             dictionary, t_hash = utils.sign_and_hash('transaction', transaction, self.private_key)
-            utils.printLog("Creating Transaction ID: ",t_hash, " User ",transaction['sender'], " Sending CoinID ",transaction['coin_id']," to User ",transaction['receiver'], " Previous transaction ID ",transaction['previous_transaction'])
+            utils.printLog("Creating Transaction ID: ",t_hash, " User ",transaction['sender'], " Sending CoinID ",next(iter(transaction['coin_id']))," to User ",transaction['receiver'], " Previous transaction ID ",transaction['previous_transaction'])
             return dictionary
         return None
 

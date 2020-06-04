@@ -4,9 +4,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 import json
 import base64
+from collections import OrderedDict
+import os
 
 
-blockchain = {}
+blockchain = OrderedDict()
 previous_block = None
 number_of_users=100
 
@@ -65,6 +67,12 @@ def find_previous_transaction(cID):
         for transaction_key in block:
             if(transaction_key!='previous_block'):
                 transaction = block[transaction_key]['transaction']
-                if(cID==transaction['coin_id']):
-                    prev_transaction = transaction_key
+                try:
+                    coin_id = json.loads(transaction['coin_id'])
+                except:
+                    coin_id = transaction['coin_id']
+                for key in cID:
+                    for key2 in coin_id:
+                        if(key==key2):
+                            prev_transaction = transaction_key
     return prev_transaction
