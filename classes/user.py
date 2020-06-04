@@ -48,25 +48,6 @@ class User:
             return dictionary
         return None
 
-    def check_blockchain(self,block):
-        for key in block:
-            if(key!="previous_block"):
-                signed_t = block[key]
-                transaction = signed_t['transaction']
-                sender = transaction['sender']
-                receiver = transaction['receiver']
-                cID = transaction['coin_id']
-                if(self.user_id==sender):
-                    print("User ",self.user_id," contains ",cID,"?",self.coins.__contains__(cID))
-                    if(not self.coins.__contains__(cID)):
-                        print(self.coins)
-                        print(block)
-                    self.coins.remove(cID)
-
-                elif(self.user_id==receiver):
-                    print("Receiving ",cID)
-                    self.coins.append(cID)
-
 
 
 
