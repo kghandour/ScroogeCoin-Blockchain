@@ -10,6 +10,7 @@ import os
 
 blockchain = OrderedDict()
 previous_block = None
+previous_block_signature = None
 number_of_users=100
 
 def printLog(*args, **kwargs): # Stackoverflow: https://stackoverflow.com/questions/11325019/how-to-output-to-the-console-and-file
@@ -57,6 +58,11 @@ def sign_and_hash(message_type, message, private_key):
     if(message_type == "block"):
         global previous_block
         previous_block = b64_hash
+        global previous_block_signature
+        signed_b = sign_message(private_key, b64_hash)
+        encoded_b = base64.b64encode(signed_b)
+        no_bytes_b = encoded_b.decode('utf-8')
+        previous_block_signature = no_bytes_b
     dictionary = {b64_hash : dict_with_sig}
     return dictionary, b64_hash
 

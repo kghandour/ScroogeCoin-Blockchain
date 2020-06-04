@@ -212,7 +212,7 @@ if __name__ == "__main__":
             signed_block, _ = sign_and_hash("block", block, scrooge_private)
             for key in signed_block:
                 utils.blockchain[key] = signed_block[key]
-                utils.printLog("Block ID: ",key," Previous block ID ", block['previous_block'])
+                utils.printLog("Block ID: ",key," Previous block ID ", block['previous_block'], " Block has pointer is signed. ")
             complete_transaction(block)
         # sys.stdout = orig_stdout
         # f.close()
