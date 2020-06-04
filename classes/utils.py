@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 import json
 import base64
 
+
 blockchain = {}
 previous_block = None
 number_of_users=100

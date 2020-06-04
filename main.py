@@ -11,6 +11,7 @@ import classes.utils as utils
 from keyboard import is_pressed
 import sys
 import json
+from collections import OrderedDict
 
 
 
@@ -31,12 +32,15 @@ def initialize_users():
         for j in range(10):
             cID = str(i*10+j)
             signature = sign_message(scrooge_private, str(cID))
-            newUser.add_coin([cID, signature])
+            encoded = base64.b64encode(signature)
+            no_bytes = encoded.decode('utf-8')
+            coin_dict = {cID: no_bytes}
+            newUser.add_coin(coin_dict)
             transaction = {}
             transaction['previous_transaction'] = None
             transaction['sender'] = 'scrooge'
             transaction['receiver'] = newUser.user_id
-            transaction['coin_id'] = cID
+            transaction['coin_id'] = json.dumps(coin_dict)
             transactions.append(transaction)
 
         utils.printLog("User "+str(i)+"\n"+str(newUser.private_key.public_key().public_bytes(
@@ -102,7 +106,7 @@ def doChecks(check_double_spending=False):
                 index-=1
 
 def create_block(print_transactions=False):
-    block = {}
+    block = OrderedDict()
     for index in range(10):
         item = queue[index]
         for key in item:
@@ -165,10 +169,9 @@ def complete_transaction(block):
             transaction = signed_t['transaction']
             sender = find_user(transaction['sender'])
             cID = transaction['coin_id']
+            sender.remove_coin(cID)
             receiver = find_user(transaction['receiver'])
-            coin = sender.remove_coin(cID)
-            receiver.add_coin(coin)
-
+            receiver.add_coin(cID)
 
 
 if __name__ == "__main__":
