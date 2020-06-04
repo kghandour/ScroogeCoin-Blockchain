@@ -88,3 +88,37 @@ Blockchain - Ordered Dictionary of blocks
 
 
 
+## Output
+Initialization for the number of users and coins
+```
+User ID
+public key
+number of coins
+```
+
+Creating Transactions
+```
+Creating Transaction ID:  [Transaction ID]  User  [Sender ID]  Sending CoinID  [Coin ID]  to User  [Receiver ID]  Previous transaction ID  [Previous Transaction ID]
+```
+
+Detected Double spending
+```
+Double Spending, User  [ID]  Tried to pay coin ID {'[Coin ID]': '[Coin signature by scrooge]'} to Users  [First user ID]  and [Second user ID]
+```
+
+Block Creation
+```
+Creating a block
+Adding to block Transaction ID:  [First transaction ID]
+Adding to block Transaction ID:  [Second transaction ID]
+Adding to block Transaction ID:  [Third transaction ID]
+Adding to block Transaction ID:  [Fourth transaction ID]
+Adding to block Transaction ID:  [Fifth transaction ID]
+Adding to block Transaction ID:  [Sixth transaction ID]
+Adding to block Transaction ID:  [Seventh transaction ID]
+Adding to block Transaction ID:  [Eighth transaction ID]
+Adding to block Transaction ID:  [Nineth transaction ID]
+Adding to block Transaction ID:  [Tenth transaction ID]
+Block ID:  [Block Hash]  Previous block ID  [Previous block hash]
+```
+
