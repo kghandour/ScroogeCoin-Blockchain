@@ -30,6 +30,10 @@ The transaction is then signed and hashed using the user's private key. The tran
 
 Once the queue reaches 10 or more transactions, checks are done to make sure that all transactions are valid.
 
+#### Proper owner
+Transaction sender is verified that he owns the coin. This is done by calling the function ``` find_owner ``` which takes a coin ID as parameter. The blockchain is looped over to check the transactions that contains the same coin and checks the final receiver of the coin.
+
+
 #### Valid signature
 Transaction's signature is checked using the user's public key. 
 

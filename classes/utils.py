@@ -11,7 +11,7 @@ import os
 blockchain = OrderedDict()
 previous_block = None
 previous_block_signature = None
-number_of_users=100
+number_of_users=10
 
 def printLog(*args, **kwargs): # Stackoverflow: https://stackoverflow.com/questions/11325019/how-to-output-to-the-console-and-file
     print(*args, **kwargs)

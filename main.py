@@ -52,11 +52,31 @@ def initialize_users():
         users.append(newUser)
     return users, transactions
 
+def find_owner(cID):
+    owner = None
+    for key in utils.blockchain:
+        block = utils.blockchain[key]['block']
+        for transaction_key in block:
+            if(transaction_key!='previous_block'):
+                transaction = block[transaction_key]['transaction']
+                try:
+                    coin_id = json.loads(transaction['coin_id'])
+                except:
+                    coin_id = transaction['coin_id']
+                for key in cID:
+                    for key2 in coin_id:
+                        if(key==key2):
+                            owner = transaction['receiver']
+    return owner
+
 def verify_signature(j, signature):
     t = json.loads(j)
     with_bytes= signature.encode('utf-8')    
     b = base64.b64decode(with_bytes)
     sender_id = t['sender']
+    # print(sender_id, " compared to owner ", find_owner(t['coin_id']))
+    if(sender_id!=find_owner(t['coin_id'])):
+        return False
     public_key = scrooge_private.public_key()
     if(sender_id != 'scrooge'):
         sender = find_user(sender_id)
@@ -74,6 +94,7 @@ def verify_signature(j, signature):
         return verify
     except InvalidSignature:
         return False
+
 
 def verify_transaction(transaction):
     signature = transaction['signature']
@@ -94,6 +115,8 @@ def check_double(transaction, index):
                 index-=1
                 return True    
     return False
+
+
 
 def doChecks(check_double_spending=False):
     for index, item in enumerate(queue):
@@ -188,7 +211,6 @@ if __name__ == "__main__":
         dictionary, _ = sign_and_hash("transaction", transaction, scrooge_private)
         queue.append(dictionary)
         if(len(queue)==10):
-            doChecks(check_double_spending=False)
             block = create_block()
             queue = []
             signed_block, _  = sign_and_hash("block", block, scrooge_private)
